@@ -1,0 +1,89 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.12"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.12"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12"/>
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.12">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Assets\sdhc_logo.svg"/>
+        <None Remove="Assets\sdxc_logo.svg"/>
+        <None Remove="Assets\sd_logo.svg"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Assets\sd_logo.png"/>
+        <AvaloniaResource Include="Assets\sd_logo.png"/>
+        <None Remove="Assets\sdhc_logo.png"/>
+        <AvaloniaResource Include="Assets\sdhc_logo.png"/>
+        <None Remove="Assets\sdxc_logo.png"/>
+        <AvaloniaResource Include="Assets\sdxc_logo.png"/>
+        <None Remove="Assets\sd_card_icon_48.ico"/>
+        <AvaloniaResource Include="Assets\sd_card_icon_48.ico"/>
+        <None Remove="Assets\error_72pt.png"/>
+        <AvaloniaResource Include="Assets\error_72pt.png"/>
+        <None Remove="Assets\error_128pt.png"/>
+        <AvaloniaResource Include="Assets\error_128pt.png"/>
+        <None Remove="Assets\info_72pt.png"/>
+        <AvaloniaResource Include="Assets\info_72pt.png"/>
+        <None Remove="Assets\info_128pt.png"/>
+        <AvaloniaResource Include="Assets\info_128pt.png"/>
+        <None Remove="Assets\question_72pt.png"/>
+        <AvaloniaResource Include="Assets\question_72pt.png"/>
+        <None Remove="Assets\question_128pt.png"/>
+        <AvaloniaResource Include="Assets\question_128pt.png"/>
+        <None Remove="Assets\waring_72pt.png"/>
+        <None Remove="Assets\warning_128pt.png"/>
+        <AvaloniaResource Include="Assets\warning_128pt.png"/>
+        <None Remove="Assets\ok_32pt.png"/>
+        <AvaloniaResource Include="Assets\ok_32pt.png"/>
+        <None Remove="Assets\cancel_32pt.png"/>
+        <AvaloniaResource Include="Assets\cancel_32pt.png"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Views\App.axaml.cs">
+            <DependentUpon>App.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\MainWindow.axaml.cs">
+            <DependentUpon>MainWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\MessageBox.axaml.cs">
+            <DependentUpon>MessageBox.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="Views\App.axaml"/>
+        <AdditionalFiles Include="Views\MainWindow.axaml"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Controls\"/>
+        <Folder Include="Converters\"/>
+        <Folder Include="ViewModels\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove=".git\**"/>
+        <Content Remove=".git\**"/>
+        <None Remove=".git\**"/>
+    </ItemGroup>
+
+</Project>

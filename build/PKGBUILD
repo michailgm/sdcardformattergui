@@ -1,0 +1,42 @@
+# Maintainer: Вашето Име <email@example.com>
+pkgname=sdcardformattergui
+pkgver=r13.5fc782c
+pkgrel=1
+pkgdesc="Приложение за форматиране на SD карти"
+arch=('x86_64')
+depends=('dotnet-runtime-8.0' 'sdcardformatter')
+makedepends=('dotnet-sdk-8.0' 'git')
+options=('!debug' '!strip')
+
+prepare() {
+    cp -fr "${startdir}/../src" "$srcdir/$pkgname"
+}
+
+pkgver() {
+  cd "${startdir}/.."
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+    cd "$srcdir/$pkgname"
+    dotnet publish "SDCardFormatterApp.csproj" \
+    -c Release \
+    -r linux-x64 \
+    --no-self-contained \
+    -p:PublishSingleFile=false \
+    -p:DebugType=None \
+    --output "out/$pkgname"
+}
+
+package() {
+    cd "$srcdir/$pkgname/out/$pkgname"
+
+    install -d "$pkgdir/usr/lib/$pkgname"
+    cp -av . "$pkgdir/usr/lib/$pkgname/"
+
+    install -d "$pkgdir/usr/bin"
+    ln -s "/usr/lib/$pkgname/SDCardFormatterApp" "$pkgdir/usr/bin/SDCardFormatterApp"
+
+    install -Dm644 "${startdir}/SDCard_logo.png" "$pkgdir/usr/share/pixmaps/sdcardformattergui.png"
+    install -Dm644 "${startdir}/sdcardformattergui.desktop" "$pkgdir/usr/share/applications/sdcardformattergui.desktop"
+}

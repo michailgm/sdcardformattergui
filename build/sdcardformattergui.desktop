@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=SD Card Formatter
+Name[bg]=Форматиране на SD карти
+Comment=Официален формат за SD/SDHC/SDXC карти
+Comment[bg]=Инструмент за правилно форматиране на SD карти
+Exec=/usr/bin/SDCardFormatterApp
+Icon=sdcardformattergui
+Terminal=false
+Type=Application
+Categories=Utility;System;Settings;
+StartupWMClass=SDCardFormatterApp
+Keywords=format;sd;card;disk;usb;
