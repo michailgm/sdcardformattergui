@@ -13,7 +13,7 @@ namespace SDCardFormatterApp;
 
 public class App : Application
 {
-    private const string MutexName = "SDCardFormatterApp_{079D6FFC-E104-4C1B-80BD-A61110B611E5}";
+    private const string MutexName = @"Global\SDCardFormatterApp_{079D6FFC-E104-4C1B-80BD-A61110B611E5}";
     private static Mutex mutex;
 
     public override void Initialize()
