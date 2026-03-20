@@ -286,6 +286,7 @@ public partial class MainWindow : Window
         finally
         {
             FormatBtn.IsEnabled = true;
+            FormatBtn.Focus();
             ExitBtn.IsEnabled = true;
             await LoadDrivesAsync();
         }
