@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -183,6 +184,15 @@ public partial class MainWindow : Window
         }
     }
 
+    public static bool IsValidVolumeLabel(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+            return false;
+
+        Regex regex = new Regex(@"^[A-Z0-9_]{1,11}$");
+        return regex.IsMatch(label.ToUpper());
+    }
+
     private void OnDeviceInserted(object sender, DeviceEventArgs e) =>
         Dispatcher.UIThread.Post(async () => await LoadDrivesAsync());
 
@@ -208,6 +218,13 @@ public partial class MainWindow : Window
             return;
         }
 
+        string label = string.IsNullOrWhiteSpace(VolumeLabelTxt.Text) ? "SDCARD" : VolumeLabelTxt.Text;
+        if (!IsValidVolumeLabel(label))
+        {
+            ShowError("Невалидно име на дял");
+            return;
+        };
+
         if (!await PasswordDialog.IsSudoCachedAsync())
         {
             (bool Result, string Password) authenticated = await PasswordDialog.AuthenticateWithSudoAsync(this);
@@ -229,6 +246,7 @@ public partial class MainWindow : Window
             return;
 
         FormatBtn.IsEnabled = false;
+        ExitBtn.IsEnabled = false;
         FormatProgress.Value = 0;
 
         UpdateStatus("Разкачване на устройството...");
@@ -238,7 +256,6 @@ public partial class MainWindow : Window
             await disk.UnmountAllAsync();
 
             UpdateStatus("Форматиране...");
-            string label = string.IsNullOrWhiteSpace(VolumeLabelTxt.Text) ? "SDCARD" : VolumeLabelTxt.Text;
 
             FormatType formatType = OverwriteFormatRb.IsChecked == true ? FormatType.Overwrite : FormatType.Quick;
             bool formatSuccess = false;
@@ -267,6 +284,7 @@ public partial class MainWindow : Window
         finally
         {
             FormatBtn.IsEnabled = true;
+            ExitBtn.IsEnabled = true;
             await LoadDrivesAsync();
         }
     }
@@ -403,7 +421,7 @@ public partial class MainWindow : Window
         await Task.WhenAll(ddTask, progressTask);
 
         int exitCode = await ddTask;
-        return exitCode == 0 || exitCode == 1;        
+        return exitCode == 0 || exitCode == 1;
     }
 
     private async Task<bool> FormatSDCardDeviceAsync(LsblkDisk disk, string label, FormatType formatType)

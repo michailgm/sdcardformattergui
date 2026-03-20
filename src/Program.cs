@@ -21,6 +21,14 @@ internal class Program
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
+            .With(new X11PlatformOptions
+            {
+                EnableMultiTouch = true,
+            })
+            .With(new SkiaOptions
+            {
+                MaxGpuResourceSizeBytes = 1024 * 1024 * 1024
+            })
             .LogToTrace();
     }
 }

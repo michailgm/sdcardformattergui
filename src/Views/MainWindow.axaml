@@ -68,15 +68,15 @@
                                        HorizontalAlignment="Center" />
                         </ComboBoxItem>
                     </ComboBox.Items>
-                    <ComboBoxItem>/dev/sdb - 32GB SDHC</ComboBoxItem>
+                    <ComboBoxItem></ComboBoxItem>
                 </ComboBox>
 
                 <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="12" Background="White" CornerRadius="2">
                     <Grid ColumnDefinitions="*, Auto">
                         <StackPanel Spacing="6">
                             <Label Content="Информация за картата" FontWeight="SemiBold" Margin="0,0,0,5" />
-                            <TextBlock Name="CardTypeTxt" Text="Тип: SDHC" FontSize="12" Foreground="#555555" />
-                            <TextBlock Name="CapacityTxt" Text="Капацитет: 29.72 GB" FontSize="12" Foreground="#555555" />
+                            <TextBlock Name="CardTypeTxt" Text="Тип: --" FontSize="12" Foreground="#555555" />
+                            <TextBlock Name="CapacityTxt" Text="Капацитет: --" FontSize="12" Foreground="#555555" />
                         </StackPanel>
                         <Image Name="CardTypeLogo" Grid.Column="1" Width="60" Height="40" VerticalAlignment="Center"
                                Margin="10,0,0,0" />

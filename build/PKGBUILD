@@ -1,6 +1,6 @@
 # Maintainer: Вашето Име <email@example.com>
 pkgname=sdcardformattergui
-pkgver=r13.5fc782c
+pkgver=r4.fd552ae
 pkgrel=1
 pkgdesc="Приложение за форматиране на SD карти"
 arch=('x86_64')
