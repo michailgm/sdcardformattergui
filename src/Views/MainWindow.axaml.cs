@@ -63,6 +63,8 @@ public partial class MainWindow : Window
     {
         try
         {
+            await Dispatcher.UIThread.InvokeAsync(() => FormatProgress.Value = 0);
+                        
             List<LsblkDisk> allDisks = await LsblkDisk.GetAllDrives();
             List<LsblkDisk> filtered = allDisks?
                 .Where(d => d.Type == "disk" && d.Transport == "usb" && d.Removable).ToList() ?? new List<LsblkDisk>();
