@@ -223,7 +223,7 @@ public partial class MainWindow : Window
         string label = string.IsNullOrWhiteSpace(VolumeLabelTxt.Text) ? "SDCARD" : VolumeLabelTxt.Text;
         if (!IsValidVolumeLabel(label))
         {
-            ShowError("Невалидно име на дял");
+            await ShowError("Невалидно име на дял");
             return;
         };
 
