@@ -50,7 +50,7 @@ public partial class MainWindow : Window
             }
         };
 
-        this.KeyDown += OnWindowKeyDown;
+        KeyDown += OnWindowKeyDown;
     }
 
     private async Task InitializeAsync()
@@ -64,9 +64,9 @@ public partial class MainWindow : Window
         try
         {
             await Dispatcher.UIThread.InvokeAsync(() => FormatProgress.Value = 0);
-                        
-            List<LsblkDisk> allDisks = await LsblkDisk.GetAllDrives();
-            List<LsblkDisk> filtered = allDisks?
+
+            var allDisks = await LsblkDisk.GetAllDrives();
+            var filtered = allDisks?
                 .Where(d => d.Type == "disk" && d.Transport == "usb" && d.Removable).ToList() ?? new List<LsblkDisk>();
 
             await Dispatcher.UIThread.InvokeAsync(() => UpdateDriveSelectorAsync(filtered));
@@ -84,11 +84,11 @@ public partial class MainWindow : Window
 
         if (disks.Any())
         {
-            foreach (LsblkDisk disk in disks)
+            foreach (var disk in disks)
             {
-                string size = FormatSize(disk.Size);
-                string model = string.IsNullOrWhiteSpace(disk.Model) ? "USB Drive" : disk.Model.Trim();
-                string display = $"/dev/{disk.Name} - {size} {model}";
+                var size = FormatSize(disk.Size);
+                var model = string.IsNullOrWhiteSpace(disk.Model) ? "USB Drive" : disk.Model.Trim();
+                var display = $"/dev/{disk.Name} - {size} {model}";
 
                 DriveSelector.Items.Add(new ComboBoxItem
                 {
@@ -121,7 +121,7 @@ public partial class MainWindow : Window
     {
         string[] sizes = { "B", "KB", "MB", "GB", "TB" };
         double len = bytes;
-        int order = 0;
+        var order = 0;
 
         while (len >= 1024 && order < sizes.Length - 1)
         {
@@ -132,10 +132,15 @@ public partial class MainWindow : Window
         return $"{len:0.##} {sizes[order]}";
     }
 
-    private LsblkDisk GetCurrentSelectedDisk() =>
-        DriveSelector != null ? DriveSelector.SelectedItem is ComboBoxItem item && item.Tag is LsblkDisk disk ? disk : null : null;
+    private LsblkDisk GetCurrentSelectedDisk()
+    {
+        return DriveSelector != null ? DriveSelector.SelectedItem is ComboBoxItem item && item.Tag is LsblkDisk disk ? disk : null : null;
+    }
 
-    private void UpdateCurrentSelectedSdCardInfo() => UpdateSdCardInfo(GetCurrentSelectedDisk());
+    private void UpdateCurrentSelectedSdCardInfo()
+    {
+        UpdateSdCardInfo(GetCurrentSelectedDisk());
+    }
 
     private void UpdateSdCardInfo(LsblkDisk disk)
     {
@@ -144,7 +149,7 @@ public partial class MainWindow : Window
 
         if (CardStatusText != null)
         {
-            string deviceInfo = disk != null ? $"Избрана е: {disk.Name} {FormatSize(disk.Size)}" : "Не е избрана карта";
+            var deviceInfo = disk != null ? $"Избрана е: {disk.Name} {FormatSize(disk.Size)}" : "Не е избрана карта";
             CardStatusText.Text = (availableDevices?.Count ?? 0) == 0 ? "Няма налични карти" : deviceInfo;
         }
 
@@ -158,8 +163,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        string type = LsblkDisk.GetSdCardType(disk);
-        string capacity = FormatSize(disk.Size);
+        var type = LsblkDisk.GetSdCardType(disk);
+        var capacity = FormatSize(disk.Size);
 
         CardTypeTxt.Text = $"Тип: {type}";
         CapacityTxt.Text = $"Капацитет: {capacity}";
@@ -169,7 +174,7 @@ public partial class MainWindow : Window
 
     private void UpdateCardLogo(string type)
     {
-        string assetPath = type switch
+        var assetPath = type switch
         {
             "SDHC" => "avares://SDCardFormatterApp/Assets/sdhc_logo.png",
             "SDXC" => "avares://SDCardFormatterApp/Assets/sdxc_logo.png",
@@ -178,7 +183,7 @@ public partial class MainWindow : Window
 
         try
         {
-            Uri uri = new Uri(assetPath);
+            var uri = new Uri(assetPath);
             CardTypeLogo.Source = new Bitmap(AssetLoader.Open(uri));
         }
         catch
@@ -191,15 +196,19 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(label))
             return false;
 
-        Regex regex = new Regex(@"^[A-Z0-9_]{1,11}$");
+        var regex = new Regex(@"^[A-Z0-9_]{1,11}$");
         return regex.IsMatch(label.ToUpper());
     }
 
-    private void OnDeviceInserted(object sender, DeviceEventArgs e) =>
+    private void OnDeviceInserted(object sender, DeviceEventArgs e)
+    {
         Dispatcher.UIThread.Post(async () => await LoadDrivesAsync());
+    }
 
-    private void OnDeviceRemoved(object sender, DeviceEventArgs e) =>
+    private void OnDeviceRemoved(object sender, DeviceEventArgs e)
+    {
         Dispatcher.UIThread.Post(async () => await LoadDrivesAsync());
+    }
 
     private void OnDeviceListChanged(object sender, DevicesListChangedEventArgs e)
     {
@@ -212,7 +221,7 @@ public partial class MainWindow : Window
 
     private async void OnFormatClicked(object sender, RoutedEventArgs e)
     {
-        LsblkDisk disk = GetCurrentSelectedDisk();
+        var disk = GetCurrentSelectedDisk();
 
         if (disk == null)
         {
@@ -220,16 +229,18 @@ public partial class MainWindow : Window
             return;
         }
 
-        string label = string.IsNullOrWhiteSpace(VolumeLabelTxt.Text) ? "SDCARD" : VolumeLabelTxt.Text;
+        var label = string.IsNullOrWhiteSpace(VolumeLabelTxt.Text) ? "SDCARD" : VolumeLabelTxt.Text;
         if (!IsValidVolumeLabel(label))
         {
             await ShowError("Невалидно име на дял");
             return;
-        };
+        }
+
+        ;
 
         if (!await PasswordDialog.IsSudoCachedAsync())
         {
-            (bool Result, string Password) authenticated = await PasswordDialog.AuthenticateWithSudoAsync(this);
+            var authenticated = await PasswordDialog.AuthenticateWithSudoAsync(this);
 
             if (!authenticated.Result)
             {
@@ -240,7 +251,7 @@ public partial class MainWindow : Window
             password = authenticated.Password;
         }
 
-        MessageBoxResult result = await ShowConfirmation(
+        var result = await ShowConfirmation(
             "Потвърждение",
             $"Сигурни ли сте, че искате да форматирате:\n/dev/{disk.Name}?\n\nВсички данни ще бъдат изтрити!");
 
@@ -259,8 +270,8 @@ public partial class MainWindow : Window
 
             UpdateStatus("Форматиране...");
 
-            FormatType formatType = OverwriteFormatRb.IsChecked == true ? FormatType.Overwrite : FormatType.Quick;
-            bool formatSuccess = false;
+            var formatType = OverwriteFormatRb.IsChecked == true ? FormatType.Overwrite : FormatType.Quick;
+            var formatSuccess = false;
 
             if (await IsToolAvailableAsync("format_sd"))
                 formatSuccess = await FormatDeviceAsync(disk, label, formatType);
@@ -300,20 +311,20 @@ public partial class MainWindow : Window
             return false;
         }
 
-        long initialWritten = GetTotalBytesWritten(disk.Name);
+        var initialWritten = GetTotalBytesWritten(disk.Name);
         if (initialWritten < 0) initialWritten = 0;
 
-        long deviceSize = disk.Size;
-        string device = $"/dev/{disk.Name}";
+        var deviceSize = disk.Size;
+        var device = $"/dev/{disk.Name}";
 
         try
         {
-            string arguments = $"-l \"{label}\"";
+            var arguments = $"-l \"{label}\"";
             if (formatType == FormatType.Overwrite)
                 arguments += " --overwrite";
             arguments += $" {device}";
 
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = "sudo",
                 Arguments = $"format_sd {arguments}",
@@ -324,7 +335,7 @@ public partial class MainWindow : Window
                 CreateNoWindow = true
             };
 
-            using Process process = Process.Start(psi);
+            using var process = Process.Start(psi);
             if (process == null)
             {
                 await ShowError("Грешка: Не може да стартира format_sd.");
@@ -334,18 +345,18 @@ public partial class MainWindow : Window
             await process.StandardInput.WriteLineAsync(password);
             await process.StandardInput.FlushAsync();
 
-            Task progressTask = Task.Run(async () =>
+            var progressTask = Task.Run(async () =>
             {
                 while (!process.HasExited)
                 {
-                    long currentWritten = GetTotalBytesWritten(disk.Name);
+                    var currentWritten = GetTotalBytesWritten(disk.Name);
 
                     if (currentWritten >= 0)
                     {
-                        long delta = currentWritten - initialWritten;
+                        var delta = currentWritten - initialWritten;
                         if (delta < 0) delta = 0;
 
-                        double percent = deviceSize > 0 ? delta * 100.0 / deviceSize : 0;
+                        var percent = deviceSize > 0 ? delta * 100.0 / deviceSize : 0;
                         percent = Math.Min(100, Math.Max(0, percent));
 
                         await Dispatcher.UIThread.InvokeAsync(() => FormatProgress.Value = percent);
@@ -357,7 +368,7 @@ public partial class MainWindow : Window
                 await Dispatcher.UIThread.InvokeAsync(() => FormatProgress.Value = 100);
             });
 
-            Task processWaitForExitTask = process.WaitForExitAsync();
+            var processWaitForExitTask = process.WaitForExitAsync();
             await Task.WhenAll(processWaitForExitTask, progressTask);
 
             if (process.ExitCode == 0)
@@ -376,7 +387,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = "which",
                 Arguments = toolName,
@@ -385,7 +396,7 @@ public partial class MainWindow : Window
                 CreateNoWindow = true
             };
 
-            using Process process = Process.Start(psi);
+            using var process = Process.Start(psi);
             if (process == null) return false;
 
             await process.WaitForExitAsync();
@@ -400,18 +411,18 @@ public partial class MainWindow : Window
     private async Task<bool> OverwriteDeviceAsync(string devPath, string deviceName, long totalSize)
     {
         UpdateStatus("Пълно зануляване (Overwrite)...");
-        long initialWritten = GetTotalBytesWritten(deviceName);
+        var initialWritten = GetTotalBytesWritten(deviceName);
 
-        Task<int> ddTask = Sudo.RunWithPasswordAsync($"dd if=/dev/zero of={devPath} bs=4M status=none iflag=fullblock");
-        Task progressTask = Task.Run(async () =>
+        var ddTask = Sudo.RunWithPasswordAsync($"dd if=/dev/zero of={devPath} bs=4M status=none iflag=fullblock");
+        var progressTask = Task.Run(async () =>
         {
             while (!ddTask.IsCompleted)
             {
-                long current = GetTotalBytesWritten(deviceName);
+                var current = GetTotalBytesWritten(deviceName);
 
                 if (current >= 0)
                 {
-                    double percent = (double)(current - initialWritten) / totalSize * 100;
+                    var percent = (double)(current - initialWritten) / totalSize * 100;
                     Dispatcher.UIThread.Post(() => FormatProgress.Value = Math.Clamp(percent, 0, 99));
                 }
 
@@ -423,7 +434,7 @@ public partial class MainWindow : Window
 
         await Task.WhenAll(ddTask, progressTask);
 
-        int exitCode = await ddTask;
+        var exitCode = await ddTask;
         return exitCode == 0 || exitCode == 1;
     }
 
@@ -431,10 +442,10 @@ public partial class MainWindow : Window
     {
         if (!await EnsureToolsInstalledAsync()) return false;
 
-        string devPath = $"/dev/{disk.Name}";
-        bool isDirectReader = disk.Name.StartsWith("mmcblk");
-        string partPath = isDirectReader ? $"{devPath}p1" : $"{devPath}1";
-        bool isSDXC = disk.Size > 32L * 1024 * 1024 * 1024;
+        var devPath = $"/dev/{disk.Name}";
+        var isDirectReader = disk.Name.StartsWith("mmcblk");
+        var partPath = isDirectReader ? $"{devPath}p1" : $"{devPath}1";
+        var isSDXC = disk.Size > 32L * 1024 * 1024 * 1024;
 
         Sudo.Password = password;
 
@@ -446,7 +457,7 @@ public partial class MainWindow : Window
 
             Dispatcher.UIThread.Post(() => FormatProgress.Value = 100);
 
-            string roCheck = await Exec.RunCommandWithOutputAsync("cat", $"/sys/block/{disk.Name}/ro");
+            var roCheck = await Exec.RunCommandWithOutputAsync("cat", $"/sys/block/{disk.Name}/ro");
             if (roCheck.Trim() == "1")
             {
                 await ShowError("Картата е в режим 'Само за четене' (Read-Only). Проверете физическото ключе за заключване!");
@@ -457,15 +468,13 @@ public partial class MainWindow : Window
             await Sudo.RunWithPasswordAsync($"wipefs -a -f {devPath}");
 
             if (formatType == FormatType.Overwrite)
-            {
                 if (!await OverwriteDeviceAsync(devPath, disk.Name, disk.Size))
                 {
                     await ShowError("Грешка при пълното зануляване.");
                     return false;
                 }
-            }
 
-            string align = isDirectReader ? "optimal" : "4MiB";
+            var align = isDirectReader ? "optimal" : "4MiB";
             UpdateStatus($"Създаване на дял ({align} подравняване)...");
 
             if (await Sudo.RunWithPasswordAsync($"parted -s {devPath} mklabel msdos") != 0)
@@ -511,22 +520,20 @@ public partial class MainWindow : Window
     private async Task<bool> EnsureToolsInstalledAsync()
     {
         string[] tools = { "mkfs.vfat", "mkfs.exfat" };
-        bool needsInstall = false;
+        var needsInstall = false;
 
-        foreach (string tool in tools)
-        {
+        foreach (var tool in tools)
             if (await Exec.RunCommandAsync("which", tool) != 0)
             {
                 needsInstall = true;
                 break;
             }
-        }
 
         if (!needsInstall) return true;
 
         UpdateStatus("Инсталиране на липсващи инструменти...");
 
-        string osRelease = await File.ReadAllTextAsync("/etc/os-release");
+        var osRelease = await File.ReadAllTextAsync("/etc/os-release");
 
         if (osRelease.Contains("arch", StringComparison.OrdinalIgnoreCase))
         {
@@ -614,16 +621,16 @@ public partial class MainWindow : Window
 
     private static long GetTotalBytesWritten(string deviceName)
     {
-        string statPath = $"/sys/block/{deviceName}/stat";
+        var statPath = $"/sys/block/{deviceName}/stat";
         if (!File.Exists(statPath))
             return -1;
 
         try
         {
-            string content = File.ReadAllText(statPath);
-            string[] parts = content.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            var content = File.ReadAllText(statPath);
+            var parts = content.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length >= 8 && long.TryParse(parts[6], out long writeSectors))
+            if (parts.Length >= 8 && long.TryParse(parts[6], out var writeSectors))
                 return writeSectors * 512L;
         }
         catch

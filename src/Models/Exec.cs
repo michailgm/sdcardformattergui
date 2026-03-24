@@ -7,7 +7,7 @@ public static class Exec
 {
     public static async Task<int> RunCommandAsync(string fileName, string arguments)
     {
-        ProcessStartInfo psi = new ProcessStartInfo
+        var psi = new ProcessStartInfo
         {
             FileName = fileName,
             Arguments = arguments,
@@ -17,7 +17,7 @@ public static class Exec
             RedirectStandardError = false
         };
 
-        using Process process = Process.Start(psi);
+        using var process = Process.Start(psi);
         if (process == null) return -1;
 
         await process.WaitForExitAsync();
@@ -26,7 +26,7 @@ public static class Exec
 
     public static async Task<string> RunCommandWithOutputAsync(string fileName, string arguments)
     {
-        ProcessStartInfo psi = new ProcessStartInfo
+        var psi = new ProcessStartInfo
         {
             FileName = fileName,
             Arguments = arguments,
@@ -35,7 +35,7 @@ public static class Exec
             CreateNoWindow = true
         };
 
-        using Process process = Process.Start(psi);
+        using var process = Process.Start(psi);
         if (process == null) return "";
         return await process.StandardOutput.ReadToEndAsync();
     }

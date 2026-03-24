@@ -23,7 +23,7 @@ internal class Program
             .WithInterFont()
             .With(new X11PlatformOptions
             {
-                EnableMultiTouch = true,
+                EnableMultiTouch = true
             })
             .With(new SkiaOptions
             {

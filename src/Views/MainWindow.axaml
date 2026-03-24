@@ -36,7 +36,8 @@
                                           ZIndex="1">
                             <ContentPresenter.DataTemplates>
                                 <DataTemplate DataType="x:String">
-                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="12" Foreground="#333333" />
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="12"
+                                               Foreground="#333333" />
                                 </DataTemplate>
                             </ContentPresenter.DataTemplates>
                         </ContentPresenter>
@@ -68,7 +69,7 @@
                                        HorizontalAlignment="Center" />
                         </ComboBoxItem>
                     </ComboBox.Items>
-                    <ComboBoxItem></ComboBoxItem>
+                    <ComboBoxItem />
                 </ComboBox>
 
                 <Border BorderBrush="#CCCCCC" BorderThickness="1" Padding="12" Background="White" CornerRadius="2">
@@ -88,10 +89,10 @@
                         <RadioButton Name="QuickFormatRb" Content="Бърз формат" FontSize="13" IsChecked="True" />
                         <RadioButton Name="OverwriteFormatRb" Content="Пълен формат" FontSize="13" />
                         <Label Content="Етикет на дяла" FontWeight="SemiBold" Margin="0,5,0,0" FontSize="13" />
-                        <TextBox Name="VolumeLabelTxt" Watermark="SDCARD" FontSize="13" MaxLength="11" />                        
+                        <TextBox Name="VolumeLabelTxt" Watermark="SDCARD" FontSize="13" MaxLength="11" />
                     </StackPanel>
                 </HeaderedContentControl>
-                
+
                 <StackPanel Spacing="5" Margin="0,0,0,0">
                     <ProgressBar Name="FormatProgress" Height="15" Minimum="0" Maximum="100" Value="0" FontSize="13"
                                  ShowProgressText="True" Foreground="#0078D7" />
@@ -108,8 +109,9 @@
                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                             Click="OnExitClicked" />
                 </StackPanel>
-                
-                <Label Content="SD Logo, SDHC Logo and SDXC Logo are trademarks of SD-3C, LLC." FontSize="10" Margin="0,5,0,0" HorizontalAlignment="Left"/>
+
+                <Label Content="SD Logo, SDHC Logo and SDXC Logo are trademarks of SD-3C, LLC." FontSize="10"
+                       Margin="0,5,0,0" HorizontalAlignment="Left" />
             </StackPanel>
         </ScrollViewer>
         <Border Grid.Row="1" Background="#E0E0E0" BorderBrush="#CCCCCC" BorderThickness="0,1,0,0" Padding="10,5">

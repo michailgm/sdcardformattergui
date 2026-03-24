@@ -9,7 +9,7 @@ public static class Sudo
 
     public static async Task<int> RunWithPasswordAsync(string command)
     {
-        ProcessStartInfo psi = new ProcessStartInfo
+        var psi = new ProcessStartInfo
         {
             FileName = "sudo",
             Arguments = $"-S sh -c \"{command}\"",
@@ -20,7 +20,7 @@ public static class Sudo
             CreateNoWindow = true
         };
 
-        using Process process = Process.Start(psi);
+        using var process = Process.Start(psi);
         if (process == null) return -1;
 
         await process.StandardInput.WriteLineAsync(Password);
@@ -32,7 +32,7 @@ public static class Sudo
 
     public static async Task<string> RunWithPasswordAndOutAsync(string command)
     {
-        ProcessStartInfo psi = new ProcessStartInfo
+        var psi = new ProcessStartInfo
         {
             FileName = "sudo",
             Arguments = $"-S sh -c \"{command}\"",
@@ -43,13 +43,13 @@ public static class Sudo
             CreateNoWindow = true
         };
 
-        using Process process = Process.Start(psi);
+        using var process = Process.Start(psi);
         if (process == null) return string.Empty;
 
         await process.StandardInput.WriteLineAsync(Password);
         await process.StandardInput.FlushAsync();
         process.StandardInput.Close();
-        
+
         await process.WaitForExitAsync();
         return process.ExitCode == 0 ? await process.StandardOutput.ReadToEndAsync() : string.Empty;
     }

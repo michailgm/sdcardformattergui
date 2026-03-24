@@ -34,7 +34,7 @@ public class App : Application
 
         if (!Debugger.IsAttached)
         {
-            mutex = new Mutex(true, MutexName, out bool createdNew);
+            mutex = new Mutex(true, MutexName, out var createdNew);
 
             if (!createdNew)
             {
@@ -70,10 +70,10 @@ public class App : Application
 
     private static void ShowAlreadyRunningWarning()
     {
-        string desktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "";
-        bool isKDE = desktop.Contains("KDE", StringComparison.OrdinalIgnoreCase);
+        var desktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "";
+        var isKDE = desktop.Contains("KDE", StringComparison.OrdinalIgnoreCase);
 
-        string command = isKDE
+        var command = isKDE
             ? "kdialog --error 'Приложението вече е стартирано.' --title 'SD Card Formatter'"
             : "zenity --error --text='Приложението вече е стартирано.' --title='SD Card Formatter'";
 
@@ -89,7 +89,7 @@ public class App : Application
 
     private static void ShowFallbackWindow()
     {
-        Window window = new Window
+        var window = new Window
         {
             Title = "SD Card Formatter",
             Width = 320,
@@ -119,7 +119,7 @@ public class App : Application
             }
         };
 
-        Button btn = (Button)((StackPanel)window.Content).Children[1];
+        var btn = (Button)((StackPanel)window.Content).Children[1];
         btn.Click += (s, e) => window.Close();
 
         window.Show();

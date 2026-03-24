@@ -21,8 +21,8 @@ public partial class PasswordDialog : Window
         if (passwordField == null)
             throw new InvalidOperationException("PasswordField not found");
 
-        StackPanel buttonPanel = this.FindControl<StackPanel>("ButtonPanel");
-        Button defaultButton = buttonPanel.Children.OfType<Button>().FirstOrDefault(b => b.IsDefault);
+        var buttonPanel = this.FindControl<StackPanel>("ButtonPanel");
+        var defaultButton = buttonPanel.Children.OfType<Button>().FirstOrDefault(b => b.IsDefault);
         if (defaultButton == null && buttonPanel.Children.Count > 0)
             defaultButton = buttonPanel.Children[0] as Button;
 
@@ -51,8 +51,8 @@ public partial class PasswordDialog : Window
     {
         if (parent == null) return null;
 
-        PasswordDialog dialog = new PasswordDialog();
-        bool result = await dialog.ShowDialog<bool>(parent);
+        var dialog = new PasswordDialog();
+        var result = await dialog.ShowDialog<bool>(parent);
 
         return result ? dialog.Password : null;
     }
@@ -61,7 +61,7 @@ public partial class PasswordDialog : Window
     {
         try
         {
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = "sudo",
                 Arguments = "-S -v",
@@ -71,14 +71,14 @@ public partial class PasswordDialog : Window
                 CreateNoWindow = true
             };
 
-            using Process process = Process.Start(psi);
+            using var process = Process.Start(psi);
             if (process == null) return false;
 
             await process.StandardInput.WriteLineAsync(password);
             await process.StandardInput.FlushAsync();
             process.StandardInput.Close();
 
-            Task exitTask = process.WaitForExitAsync();
+            var exitTask = process.WaitForExitAsync();
 
             if (await Task.WhenAny(exitTask, Task.Delay(5000)) != exitTask)
             {
@@ -94,19 +94,23 @@ public partial class PasswordDialog : Window
         }
     }
 
-    private static async Task ShowWarning(Window parent, string title, string message) =>
+    private static async Task ShowWarning(Window parent, string title, string message)
+    {
         await MessageBox.Show(parent, title, message, MessageBoxButton.OK, MessageBoxIcon.Warning);
+    }
 
-    private static async Task ShowError(Window parent, string title, string message) =>
+    private static async Task ShowError(Window parent, string title, string message)
+    {
         await MessageBox.Show(parent, title, message, MessageBoxButton.OK, MessageBoxIcon.Error);
+    }
 
     public static async Task<(bool Result, string Password)> AuthenticateWithSudoAsync(Window parent)
     {
         const int maxAttempts = 3;
 
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            string password = await ShowPasswordDialogAsync(parent);
+            var password = await ShowPasswordDialogAsync(parent);
 
             if (string.IsNullOrEmpty(password))
                 return (false, string.Empty);
@@ -129,7 +133,7 @@ public partial class PasswordDialog : Window
     {
         try
         {
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = "sudo",
                 Arguments = "-n true",
@@ -137,7 +141,7 @@ public partial class PasswordDialog : Window
                 CreateNoWindow = true
             };
 
-            using Process process = Process.Start(psi);
+            using var process = Process.Start(psi);
             if (process == null) return false;
 
             await process.WaitForExitAsync();

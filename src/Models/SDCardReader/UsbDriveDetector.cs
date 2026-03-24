@@ -30,11 +30,10 @@ public class DeviceEventArgs : EventArgs
 
 public class UsbDriveDetector : IDisposable, IAsyncDisposable
 {
+    private readonly List<LsblkDisk> devices = new();
     private readonly SemaphoreSlim semaphore = new(1, 1);
     private readonly object syncDevicesListLock = new();
     private CancellationTokenSource cts;
-
-    private readonly List<LsblkDisk> devices = new();
     private bool disposed;
     private bool isMonitoring;
 
@@ -143,7 +142,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
 
     private async Task MonitorUdevAsync(CancellationToken token)
     {
-        ProcessStartInfo startInfo = new ProcessStartInfo
+        var startInfo = new ProcessStartInfo
         {
             FileName = "udevadm",
             Arguments = "monitor --subsystem-match=block --udev",
@@ -152,7 +151,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
             CreateNoWindow = true
         };
 
-        int retryDelay = 1000;
+        var retryDelay = 1000;
         const int maxRetryDelay = 30000;
 
         while (!token.IsCancellationRequested)
@@ -176,8 +175,8 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
                 {
                     while (!token.IsCancellationRequested && !process.StandardOutput.EndOfStream)
                     {
-                        string line = await process.StandardOutput.ReadLineAsync().ConfigureAwait(false);
-                        
+                        var line = await process.StandardOutput.ReadLineAsync().ConfigureAwait(false);
+
                         if (string.IsNullOrWhiteSpace(line)) continue;
 
                         if (line.Contains(" add ") || line.Contains(" remove "))
@@ -219,7 +218,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
     {
         if (DeviceInserted == null) return;
 
-        DeviceEventArgs insertArgs = new DeviceEventArgs
+        var insertArgs = new DeviceEventArgs
         {
             Device = device,
             Action = DeviceAction.Inserted,
@@ -233,7 +232,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
     {
         if (DeviceRemoved == null) return;
 
-        DeviceEventArgs removeArgs = new DeviceEventArgs
+        var removeArgs = new DeviceEventArgs
         {
             Device = device,
             Action = DeviceAction.Removed,
@@ -247,7 +246,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
     {
         if (DeviceListChanged == null) return;
 
-        DevicesListChangedEventArgs changeArgs = new DevicesListChangedEventArgs
+        var changeArgs = new DevicesListChangedEventArgs
         {
             Devices = currentDevices,
             Action = action,
@@ -261,12 +260,12 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
     {
         try
         {
-            string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length < 4) return;
 
-            string action = parts[2];
-            string devPath = parts[3];
-            string shortName = LsblkDisk.GetBaseDevice(devPath); // взема "sdb"
+            var action = parts[2];
+            var devPath = parts[3];
+            var shortName = LsblkDisk.GetBaseDevice(devPath); // взема "sdb"
 
             await semaphore.WaitAsync(token).ConfigureAwait(false);
 
@@ -274,7 +273,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
             {
                 case "add":
                     await Task.Delay(500, token).ConfigureAwait(false);
-                    LsblkDisk device = await LsblkDisk.GetDeviceByName(shortName, token).ConfigureAwait(false);
+                    var device = await LsblkDisk.GetDeviceByName(shortName, token).ConfigureAwait(false);
 
                     if (device != null && device.Removable && device.Type == "disk")
                     {
@@ -329,7 +328,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
     {
         try
         {
-            List<LsblkDisk> all = await LsblkDisk.GetAllDrives().ConfigureAwait(false);
+            var all = await LsblkDisk.GetAllDrives().ConfigureAwait(false);
             return all?.Where(d => d.Removable && d.Type == "disk")?.ToList() ?? new List<LsblkDisk>();
         }
         catch (Exception ex)
@@ -343,7 +342,7 @@ public class UsbDriveDetector : IDisposable, IAsyncDisposable
     {
         try
         {
-            List<LsblkDisk> fetched = await GetCurrentDevicesAsync().ConfigureAwait(false);
+            var fetched = await GetCurrentDevicesAsync().ConfigureAwait(false);
             lock (syncDevicesListLock)
             {
                 devices.Clear();
