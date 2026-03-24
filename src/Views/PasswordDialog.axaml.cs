@@ -21,8 +21,8 @@ public partial class PasswordDialog : Window
         if (passwordField == null)
             throw new InvalidOperationException("PasswordField not found");
 
-        var buttonPanel = this.FindControl<StackPanel>("ButtonPanel");
-        var defaultButton = buttonPanel.Children.OfType<Button>().FirstOrDefault(b => b.IsDefault);
+        StackPanel buttonPanel = this.FindControl<StackPanel>("ButtonPanel");
+        Button defaultButton = buttonPanel.Children.OfType<Button>().FirstOrDefault(b => b.IsDefault);
         if (defaultButton == null && buttonPanel.Children.Count > 0)
             defaultButton = buttonPanel.Children[0] as Button;
 
@@ -104,7 +104,7 @@ public partial class PasswordDialog : Window
     {
         const int maxAttempts = 3;
 
-        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
             string password = await ShowPasswordDialogAsync(parent);
 

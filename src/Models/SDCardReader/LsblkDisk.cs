@@ -81,8 +81,8 @@ public sealed class LsblkDisk
         if (string.IsNullOrWhiteSpace(deviceName))
             return DeviceType.Unknown;
 
-        var nameOnly = Path.GetFileName(deviceName);
-        var sysPath = $"/sys/class/block/{nameOnly}";
+        string nameOnly = Path.GetFileName(deviceName);
+        string sysPath = $"/sys/class/block/{nameOnly}";
 
         if (!Directory.Exists(sysPath))
             return DeviceType.Unknown;
@@ -94,19 +94,19 @@ public sealed class LsblkDisk
     {
         if (string.IsNullOrWhiteSpace(deviceName)) return string.Empty;
 
-        var nameOnly = Path.GetFileName(deviceName);
-        var sysPath = $"/sys/class/block/{nameOnly}";
+        string nameOnly = Path.GetFileName(deviceName);
+        string sysPath = $"/sys/class/block/{nameOnly}";
 
         if (!Directory.Exists(sysPath)) return nameOnly;
 
-        var di = new DirectoryInfo(sysPath);
-        var target = di.ResolveLinkTarget(true);
+        DirectoryInfo di = new DirectoryInfo(sysPath);
+        FileSystemInfo target = di.ResolveLinkTarget(true);
 
         if (target == null) return nameOnly;
 
         if (File.Exists(Path.Combine(target.FullName, "partition")))
         {
-            var parent = Directory.GetParent(target.FullName);
+            DirectoryInfo parent = Directory.GetParent(target.FullName);
             return parent?.Name ?? nameOnly;
         }
 
@@ -123,7 +123,7 @@ public sealed class LsblkDisk
     {
         if (string.IsNullOrWhiteSpace(device)) return string.Empty;
 
-        var specifiedDevice = $"/dev/{GetDeviceShortName(device)}";
+        string specifiedDevice = $"/dev/{GetDeviceShortName(device)}";
         return File.Exists(specifiedDevice) ? specifiedDevice : string.Empty;
     }
 
@@ -132,7 +132,7 @@ public sealed class LsblkDisk
         if (string.IsNullOrWhiteSpace(specifiedDeviceName))
             return ("lsblk_all", null);
 
-        var fullName = GetDeviceFullName(specifiedDeviceName);
+        string fullName = GetDeviceFullName(specifiedDeviceName);
         return string.IsNullOrEmpty(fullName)
             ? ("lsblk_all", null)
             : ($"lsblk_{GetDeviceShortName(fullName)}", fullName);
@@ -140,12 +140,12 @@ public sealed class LsblkDisk
 
     public static async Task<LsblkResult> InternalLoadDrives(string specifiedDeviceName = null, CancellationToken token = default)
     {
-        var (cacheKey, deviceArg) = GetCacheKeyAndDeviceArg(specifiedDeviceName);
+        (string cacheKey, string deviceArg) = GetCacheKeyAndDeviceArg(specifiedDeviceName);
 
-        if (simpleCache.TryGetValue(cacheKey, out var cached) && cached.Expiry > DateTime.UtcNow)
+        if (simpleCache.TryGetValue(cacheKey, out (LsblkResult Result, DateTime Expiry) cached) && cached.Expiry > DateTime.UtcNow)
             return cached.Result;
 
-        var args = "-o NAME,SIZE,TYPE,MODEL,TRAN,RM,MOUNTPOINT -J -b";
+        string args = "-o NAME,SIZE,TYPE,MODEL,TRAN,RM,MOUNTPOINT -J -b";
 
         if (!string.IsNullOrEmpty(deviceArg))
             args += $" {deviceArg}";
@@ -153,7 +153,7 @@ public sealed class LsblkDisk
         if (token == default)
             token = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
 
-        var psi = new ProcessStartInfo
+        ProcessStartInfo psi = new ProcessStartInfo
         {
             FileName = "lsblk",
             Arguments = args,
@@ -164,13 +164,13 @@ public sealed class LsblkDisk
 
         try
         {
-            using var process = Process.Start(psi);
+            using Process process = Process.Start(psi);
             if (process == null) return null;
 
-            var json = await process.StandardOutput.ReadToEndAsync(token).ConfigureAwait(false);
+            string json = await process.StandardOutput.ReadToEndAsync(token).ConfigureAwait(false);
             await process.WaitForExitAsync(token).ConfigureAwait(false);
 
-            var result = JsonSerializer.Deserialize<LsblkResult>(json);
+            LsblkResult result = JsonSerializer.Deserialize<LsblkResult>(json);
             simpleCache[cacheKey] = (result, DateTime.UtcNow.Add(CacheDuration));
             return result;
         }
@@ -184,10 +184,10 @@ public sealed class LsblkDisk
     // Метод за извличане на конкретно устройство по име (напр. "sdb")
     public static async Task<LsblkDisk> GetDeviceByName(string shortName, CancellationToken token = default)
     {
-        for (var i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
-            var result = await InternalLoadDrives(shortName, token).ConfigureAwait(false);
-            var device = result?.Blockdevices?.FirstOrDefault(d => d.Name == shortName);
+            LsblkResult result = await InternalLoadDrives(shortName, token).ConfigureAwait(false);
+            LsblkDisk device = result?.Blockdevices?.FirstOrDefault(d => d.Name == shortName);
 
             if (device != null) return device;
 
@@ -199,9 +199,9 @@ public sealed class LsblkDisk
 
     public static async Task<List<LsblkDisk>> GetAllDrives(CancellationToken token = default)
     {
-        for (var i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
-            var result = await InternalLoadDrives(null, token).ConfigureAwait(false);
+            LsblkResult result = await InternalLoadDrives(null, token).ConfigureAwait(false);
 
             if (result?.Blockdevices != null && result.Blockdevices.Count > 0)
                 return result.Blockdevices;
@@ -214,7 +214,7 @@ public sealed class LsblkDisk
 
     public async Task<bool> UnmountAllAsync(CancellationToken token = default)
     {
-        var mountPoints = new List<string>();
+        List<string> mountPoints = new List<string>();
 
         if (!string.IsNullOrEmpty(Mountpoint))
             mountPoints.Add(Mountpoint);
@@ -225,12 +225,12 @@ public sealed class LsblkDisk
 
         if (mountPoints.Count == 0) return true;
 
-        var allSuccess = true;
+        bool allSuccess = true;
 
-        foreach (var path in mountPoints)
+        foreach (string path in mountPoints)
         {
             // "umount -l" (lazy unmount) за по-сигурно разкачване
-            var psi = new ProcessStartInfo
+            ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = "umount",
                 Arguments = $"-l \"{path}\"",
@@ -240,7 +240,7 @@ public sealed class LsblkDisk
 
             try
             {
-                using var process = Process.Start(psi);
+                using Process process = Process.Start(psi);
 
                 if (process != null)
                 {
@@ -261,7 +261,7 @@ public sealed class LsblkDisk
     {
         if (disk == null) return string.Empty;
 
-        var gb = disk.Size / (1024.0 * 1024.0 * 1024.0);
+        double gb = disk.Size / (1024.0 * 1024.0 * 1024.0);
 
         if (gb <= 2.1) return "SD";
         if (gb <= 32.5) return "SDHC";

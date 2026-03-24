@@ -62,7 +62,7 @@ public partial class MessageBox : Window
 
     public static async Task<MessageBoxResult> Show(Window parent, string title, string message, MessageBoxButton buttons, MessageBoxIcon icon = MessageBoxIcon.None)
     {
-        var dialog = new MessageBox
+        MessageBox dialog = new MessageBox
         {
             Title = title,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
@@ -78,7 +78,7 @@ public partial class MessageBox : Window
 
     private void SetIcon(MessageBoxIcon icon)
     {
-        var iconPath = icon switch
+        string iconPath = icon switch
         {
             MessageBoxIcon.Information => "avares://SDCardFormatterApp/Assets/info_72pt.png",
             MessageBoxIcon.Warning => "avares://SDCardFormatterApp/Assets/warning_72pt.png",
@@ -95,7 +95,7 @@ public partial class MessageBox : Window
 
         try
         {
-            var uri = new Uri(iconPath);
+            Uri uri = new Uri(iconPath);
             iconImage.Source = new Bitmap(AssetLoader.Open(uri));
             iconImage.IsVisible = true;
         }
@@ -131,7 +131,7 @@ public partial class MessageBox : Window
                 break;
         }
 
-        var defaultButton = buttonPanel.Children.OfType<Button>().FirstOrDefault(b => b.IsDefault);
+        Button defaultButton = buttonPanel.Children.OfType<Button>().FirstOrDefault(b => b.IsDefault);
         if (defaultButton == null && buttonPanel.Children.Count > 0)
             defaultButton = buttonPanel.Children[0] as Button;
 
@@ -140,7 +140,7 @@ public partial class MessageBox : Window
 
     private void AddButton(string content, MessageBoxResult result, bool isDefault, string iconFileName)
     {
-        var buttonContent = new StackPanel
+        StackPanel buttonContent = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 5,
@@ -150,8 +150,8 @@ public partial class MessageBox : Window
 
         try
         {
-            var iconPath = $"avares://SDCardFormatterApp/Assets/{iconFileName}";
-            var icon = new Image
+            string iconPath = $"avares://SDCardFormatterApp/Assets/{iconFileName}";
+            Image icon = new Image
             {
                 Source = new Bitmap(AssetLoader.Open(new Uri(iconPath))),
                 Width = 16,
@@ -165,14 +165,14 @@ public partial class MessageBox : Window
         {
         }
 
-        var text = new TextBlock
+        TextBlock text = new TextBlock
         {
             Text = content,
             VerticalAlignment = VerticalAlignment.Center
         };
         buttonContent.Children.Add(text);
 
-        var button = new Button
+        Button button = new Button
         {
             Content = buttonContent,
             Width = 100,
